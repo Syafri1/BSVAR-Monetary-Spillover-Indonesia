@@ -10,30 +10,15 @@ clc
 clear all, close all
 
 % SAMPLE AND DATA: spl, modname, addvar
-spl = [2005 8; 2025 3]
-%spl = [1984 2; 2016 12];% ori
-%spl = [1984 2; 2008 12];% Dec2008 ZLB reached
-%spl = [1990 2; 2016 12];% Feb1999 surprises start
-%spl = [1979 7; 2016 12];% GertlerKaradi2015 sample 
+spl = [2005 8; 2025 3]; % ori
 
-modname = 'indo'; %'us1','us1','ea1','us2','ea2'
-addvar = ''; %'exp_gdp_12m','exp_cpi_12m','bkeven05','gs10','sven5f5'
+modname = 'indo';
+addvar = '';
 
 % IDENTIFICATION: idscheme, mnames
-idscheme = 'sgnm2'; %''chol','sgnm2strg','supdem'
+idscheme = 'sgnm2';
 
 mnames = {'ff4_hf','sp500_hf'}; % US baseline
-%mnames = {'ff4_hf'};
-%mnames = {'pmnegm_ff4sp500','pmposm_ff4sp500'}; % poor man's sign restrictions
-%mnames = {'ff4_hf','sp500_hf','dbkeven02_d'}; % for supdem identification
-%mnames = {'pc1ff1_hf','usstocks1_hf'}; % VAR with factors (Online Appendix C.4)
-%mnames = {'pmnegm_pc1ff1usstocks1','pmposm_pc1ff1usstocks1'}; % VAR with factors, poor man's shocks (Online Appendix C.4)
-
-%mnames = {'eureon3m_hf','stoxx50_hf'}; % euro area baseline
-%mnames = {'eureon3m_hf'};
-%mnames = {'pmnegm_eureon3mstoxx50','pmposm_eureon3mstoxx50'}; % poor man's sign restrictions
-%mnames = {'eureon3m_hf','stoxx50_hf','deurinflswap2y_d'}; % for supdem identification
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % PRIOR
@@ -68,12 +53,6 @@ end
 % nice names
 mdict = {'ff4_',    'Surprise in\newlineFederal Fund Futures';
          'sp500_',  'Surprise in\newlineS&P500'};
-%{'eureon3m_', '  surprise in\newline3m Eonia swaps';
-%    'stoxx50_', 'surprise in\newline Euro Stoxx 50';
-%    'ff4_', '  surprise in\newline3m ff futures';
-%    'sp500_', 'surprise in\newlineS&P500';
-%    'pc1ff1_', 'surprise in\newlinepolicy ind.';
-%    'usstocks1_', 'surprise in\newline1pc of stocks'};
 mnames_nice = applydictregexp(mnames, mdict);
 mylimits = nan(length(mnames),2);
 
@@ -82,15 +61,6 @@ ny1 = 5;
 switch modname
     case 'indo'
         ynames = {'BIRate','1ybond','LnIHSG','LnIPI','LnIHK'};
-        %ynames = {'1ybond','LnIHSG','LnIPI','LnIHK','BIRate'};
-    case 'us1'
-        ynames = {'gs1','logsp500','us_rgdp','us_gdpdef','ebpnew'};
-    case 'us2'
-        ynames = {'gs1','logsp500','us_ip','us_cpi','ebpnew'};
-    case 'ea1'
-        ynames = {'de1y_haver','stoxx50','ea_rgdp','ea_gdpdef','ea_bbb_oas_all_fred'};
-    case 'ea2'
-        ynames = {'de1y_haver','stoxx50','ea_ip_excl_constr','hicp','ea_bbb_oas_all_fred'};
     otherwise
         disp(modname), error('unknown modname');
 end
@@ -104,7 +74,7 @@ if ~isempty(addvar)
 end
 
 % nice_names, yylimits, nonst
-dictfname = 'C:/Users/lenovo/Documents/SKRIPSI/SKRIPSI 2.0/Jarocinski & Karadi, 2020_packages yang digunakan/data/data_var/indodict_fix.csv';
+dictfname = '.../data/indodict_fix.csv';
 fileID = fopen(dictfname);
 ydict = textscan(fileID,'%s %q %d %f %f','Delimiter',',','HeaderLines',1);
 fclose(fileID);
@@ -115,7 +85,7 @@ nonst = ydict{3};
 nonst = nonst(findstrings(ynames,ydict{1}),:);
 
 % load data
-datafname = 'C:/Users/lenovo/Documents/SKRIPSI/SKRIPSI 2.0/Jarocinski & Karadi, 2020_packages yang digunakan/data/data_var/data_final_fix.csv';
+datafname = '.../data/data_final_fix.csv';
 data.Nm = length(mnames);
 data.names = [mnames ynames];
 d = importdata(datafname); dat = d.data; txt = d.colheaders;
@@ -164,18 +134,7 @@ MAlags = 36;
 N = length(data.names);
 
 switch idscheme
-    case 'chol'
-        shocknames = data.names;
-        irfs_draws = NaN(N,N,MAlags,gssettings.ndraws);
-        for i = 1:gssettings.ndraws
-            betadraw = res.beta_draws(1:end-size(data.w,2),:,i);
-            sigmadraw = res.sigma_draws(:,:,i);
-            response = impulsdtrf(reshape(betadraw',N,N,prior.lags), chol(sigmadraw), MAlags);
-            irfs_draws(:,:,:,i) = response;
-        end
-        ss = 1;
-        if length(mnames)>1 && ((~isempty(strfind(mnames{1},'neg')) && ~isempty(strfind(mnames{2},'pos'))) || ~isempty(strfind(mnames{2},'_signrestr'))), ss = 1:2; end
-    case 'sgnm2' % baseline two sign restrictions
+       case 'sgnm2' % baseline two sign restrictions
         shocknames = [{'mon.pol.', 'CBinfo'} mnames(2+1:end) ynames];
         dims = {[1 2]};
         imonpol = 1; inews = 2;
@@ -188,35 +147,6 @@ switch idscheme
         irfs_draws = resirfssign(res, MAlags, dims, test_restr, b_normalize, max_try);
         %[irfs_draws, irfs_l_draws, irfs_u_draws] = resirfssign_robust(res, MAlags, dims, test_restr, b_normalize, max_try);
         ss = 1:2;
-    case 'sgnm2strg' % strong instrument restriction
-        % imposes that the THIRD variable goes up after mp shock
-        shocknames = [{'mon.pol.', 'CBinfo'} ynames];
-        dims = {[1 2]};
-        iyld = 3;
-        imonpol = 1; inews = 2;
-        test_restr = @(irfs)... %% restrictions by shock (i.e. by column):
-            irfs(1,imonpol,1) > 0 && irfs(2,imonpol,1) < 0 && irfs(iyld,imonpol,1)>0.01 &&... % mp
-            irfs(1,inews,1) > 0 && irfs(2,inews,1) > 0; % cbi
-        b_normalize = ones(1,N);
-        max_try = 1000;
-        disp(test_restr)
-        irfs_draws = resirfssign(res, MAlags, dims, test_restr, b_normalize, max_try);
-        ss = 1:2;
-   case 'supdem' % disentangle CB info about supply and demand
-        % requires: 1. interest rate; 2. stock price; 3. break-even inflation
-        % CBinfosup shock moves stock price down but break-even inflation up
-        shocknames = [{'mon.pol.', 'CBinfodem', 'CBinfosup'} mnames(3+1:end) ynames];
-        dims = {[1 2 3]};
-        imonpol = 1; inews = 2; isup = 3;
-        test_restr = @(irfs)... %% restrictions by shock (i.e. by column):
-            irfs(1,imonpol,1) > 0 && irfs(2,imonpol,1) < 0 && irfs(3,imonpol,1) < 0 &&... % mp
-            irfs(1,inews,1) > 0 && irfs(2,inews,1) > 0 && irfs(3,inews,1) > 0 &&... % info demand
-            irfs(1,isup,1) > -100 && irfs(2,isup,1) > 0 && irfs(3,isup,1) < 0; % info supply
-        b_normalize = ones(N,1); b_normalize(3) = -1;
-        max_try = 5000;
-        disp(test_restr)
-        irfs_draws = resirfssign(res, MAlags, dims, test_restr, b_normalize, max_try);
-        ss = 1:3;
 end
 
 %% reporting (j&k 2020)
@@ -272,9 +202,7 @@ shock_labels = {{'Guncangan Kebijakan Moneter','(pergerakan bersama negatif)'}, 
 % Definisi Nama Variabel
 var_titles_us = {{'Surprise','in federal fund futures'}, {'Surprise','in S&P 500'}};
 var_titles_indo = {{'BI Rate','(persen)'}, {'1y IDN Bond Yield','(persen)'}, {'IHSG','(100 \times log)'}, {'Output','Industri (IPI)','(100 \times log)'}, {'Harga','Konsumen (IHK)','(100 \times log)'}};
-%var_titles_indo = {{'1y IDN Bond Yield','(persen)'}, {'IHSG','(100 \times log)'}, {'Output','Industri (IPI)','(100 \times log)'}, {'Inflasi (IHK)','(100 \times log)'},{'BI Rate','(persen)'}};
 var_titles = {{'Surprise','in federal fund','futures'}, {'Surprise','in S&P 500'}, {'BI Rate','(persen)'}, {'1y IDN Bond Yield','(persen)'}, {'IHSG','(100 \times log)'}, {'Output','Industri (IPI)','(100 \times log)'}, {'Harga','Konsumen (IHK)','(100 \times log)'}};
-%var_titles = {{'Surprise','in federal fund','futures'},{'Surprise','in S&P 500'},{'1y IDN Bond Yield','(persen)'}, {'IHSG','(100 \times log)'}, {'Output','Industri (IPI)','(100 \times log)'}, {'Inflasi (IHK)','(100 \times log)'},{'BI Rate','(persen)'}};
 
 %% --- BAGIAN 1: FIGURE A (VALIDASI IDENTIFIKASI - US VARIABLES) ---
 % Layout: 2 Baris x 2 Kolom
