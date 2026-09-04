@@ -27,5 +27,5 @@ Berikut adalah hasil ekstraksi visual dari *Impulse Response Function* (IRF) yan
 Berdasarkan analisis IRF dan dekomposisi varians, berikut adalah kesimpulan utama yang sekaligus menjawab anomali ketahanan pasar keuangan domestik:
 
 <p align="center">
-  <img src="output/kesimpulan.png" width="800" alt="Kesimpulan Utama">
+  <img src="output/Kesimpulan.png" width="800" alt="Kesimpulan Utama">
 </p>
