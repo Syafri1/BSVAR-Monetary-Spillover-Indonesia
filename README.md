@@ -9,3 +9,23 @@ Proyek ini mengaplikasikan metodologi dan basis kode dari literatur ekonomi makr
 * Penggunaan *script* dan perangkat lunak turunan dalam repositori ini tunduk pada *Modified BSD License*.
 * Penggunaan basis data turunan dilisensikan di bawah *Creative Commons Attribution 4.0 International Public License*.
 Silakan merujuk pada dokumen `LICENSE` di repositori ini untuk detail selengkapnya.
+
+## Metodologi
+Analisis dilakukan menggunakan pendekatan **Bayesian Structural Vector Autoregression (BSVAR)** dengan identifikasi **Sign Restrictions**. Berikut adalah alur kerangka berpikir transmisi guncangan yang diuji dalam riset ini:
+
+<p align="center">
+  <img src="output/kerangka_berpikir.png" width="800" alt="Kerangka Berpikir">
+</p>
+
+## Temuan Utama (*Key Findings*)
+Berikut adalah hasil ekstraksi visual dari *Impulse Response Function* (IRF) yang menunjukkan respons asimetris perekonomian Indonesia terhadap dua jenis guncangan The Fed:
+
+<p align="center">
+  <img src="output/grafik_irf.png" width="800" alt="Grafik IRF">
+</p>
+
+Berdasarkan analisis IRF dan dekomposisi varians, berikut adalah kesimpulan utama yang sekaligus menjawab anomali ketahanan pasar keuangan domestik:
+
+<p align="center">
+  <img src="output/kesimpulan.png" width="800" alt="Kesimpulan Utama">
+</p>
