@@ -1,0 +1,6 @@
+name,nice_name,nonstationary,lb,ub
+BIRate,BI Rate,0,-0.1,0.15
+1ybond,1y idn bond,0,-0.15,0.2
+LnIHSG,IHSG,1,-2.5,2.5
+LnIPI,Output Industri (IPI),1,-1,1.5
+LnIHK,Harga Konsumen (IHK),1,-0.2,0.3
